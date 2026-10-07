@@ -1411,3 +1411,4 @@ function SimpleUILib:CreateWindow(config)
 	return self
 end
 
+return SimpleUILib

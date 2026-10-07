@@ -19,7 +19,7 @@ Simple Roblox UI Lib for executors, use for creating your cheats
 
 ### Option A - Load from GitHub (recommended)
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/USERNAME/REPO/main/RealUI.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/acebell1/SimpleRobloxUILib/main/SimpleRobloxUILib.lua"))()
 
 Replace USERNAME/REPO with your own GitHub path.
 

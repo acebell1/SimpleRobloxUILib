@@ -566,18 +566,128 @@ function Container:AddButton(cfg)
 	W:_accent(arrow, "TextColor3")
 	HoverCard(card, T)
 
-	local obj = { Type = "Button" }
+	-- ============ ПЛАШКА ДЛЯ БИНДА ============
+	local bindLabel = New("Frame", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 6, 0.5, 0),
+		Size = UDim2.fromOffset(70, 22),
+		BackgroundColor3 = Color3.fromRGB(10, 10, 15),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ZIndex = 5,
+		Parent = card,
+	}, { Corner(4), Padding(6, 0, 6, 0) })
+	local bindText = Label({
+		Text = "",
+		TextSize = 11,
+		TextColor3 = T.SubText,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 6,
+		Parent = bindLabel,
+	})
+
+	local obj = { Type = "Button", BoundKey = nil, _bindListening = false }
+
 	function obj:Fire()
 		Safe(cfg.Callback)
 	end
+
 	function obj:SetText(t)
 		name.Text = t
 	end
+
+	-- Пересчёт положения плашки и текста кнопки
+	function obj:_layoutBind()
+		if self.BoundKey and self.BoundKey ~= "" then
+			bindText.Text = "Bind: " .. self.BoundKey
+			local w = math.max(bindText.TextBounds.X + 16, 70)
+			bindLabel.Size = UDim2.fromOffset(w, 22)
+			bindLabel.BackgroundTransparency = 0
+			name.Position = UDim2.fromOffset(w + 10, 0)
+			name.Size = UDim2.new(1, -(w + 30), 0, 34)
+		else
+			bindText.Text = ""
+			bindLabel.BackgroundTransparency = 1
+			name.Position = UDim2.fromOffset(12, 0)
+			name.Size = UDim2.new(1, -24, 0, 34)
+		end
+	end
+
+	-- Установить бинд (передай nil, чтобы снять)
+	function obj:SetBind(keyName)
+		if keyName == nil or keyName == "" or keyName == "None" then
+			self.BoundKey = nil
+		else
+			self.BoundKey = tostring(keyName)
+		end
+		self:_layoutBind()
+	end
+
+	-- Обычный клик ЛКМ — срабатывает кнопка
 	card.MouseButton1Click:Connect(function()
 		card.BackgroundColor3 = T.Accent
 		Tween(card, { BackgroundColor3 = T.ElementHover }, 0.3)
 		obj:Fire()
 	end)
+
+	-- MMB — начать бинд
+	card.InputBegan:Connect(function(input)
+		if input.UserInputType ~= Enum.UserInputType.MouseButton3 then
+			return
+		end
+		if obj._bindListening then
+			return
+		end
+		obj._bindListening = true
+		W.Listening = true
+
+		-- показать плашку "Bind: ..."
+		bindLabel.BackgroundTransparency = 0
+		bindLabel.Size = UDim2.fromOffset(70, 22)
+		bindText.Text = "Bind: ..."
+		name.Position = UDim2.fromOffset(80, 0)
+		name.Size = UDim2.new(1, -100, 0, 34)
+
+		local conn
+		conn = UIS.InputBegan:Connect(function(inp)
+			if inp.UserInputType ~= Enum.UserInputType.Keyboard then
+				return
+			end
+			conn:Disconnect()
+
+			if inp.KeyCode == Enum.KeyCode.Backspace then
+				-- снять бинд
+				obj:SetBind(nil)
+			elseif inp.KeyCode == Enum.KeyCode.0 then
+				-- отмена — оставить старый бинд
+				obj:_layoutBind()
+			else
+				-- поставить новый бинд
+				obj:SetBind(inp.KeyCode.Name)
+			end
+
+			obj._bindListening = false
+			task.delay(0.1, function()
+				W.Listening = false
+			end)
+		end)
+		table.insert(W._connections, conn)
+	end)
+
+	-- Глобальный обработчик: нажатие привязанной клавиши = нажатие кнопки
+	W:_connect(UIS.InputBegan, function(input, processed)
+		if processed or W.Listening then
+			return
+		end
+		if input.UserInputType ~= Enum.UserInputType.Keyboard then
+			return
+		end
+		if obj.BoundKey and input.KeyCode.Name == obj.BoundKey then
+			obj:Fire()
+		end
+	end)
+
 	return obj
 end
 

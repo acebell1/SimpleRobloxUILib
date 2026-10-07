@@ -659,7 +659,7 @@ function Container:AddButton(cfg)
 			if inp.KeyCode == Enum.KeyCode.Backspace then
 				-- снять бинд
 				obj:SetBind(nil)
-			elseif inp.KeyCode == Enum.KeyCode.0 then
+			elseif inp.KeyCode == Enum.KeyCode.Delete then
 				-- отмена — оставить старый бинд
 				obj:_layoutBind()
 			else

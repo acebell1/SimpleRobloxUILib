@@ -25,23 +25,23 @@ Replace USERNAME/REPO with your own GitHub path.
 
 ### Option B - Local file
 
-Paste the entire RealUI.lua source at the top of your script, remove the demo section at the bottom (keep "return Library"), then write your code below it.
+Paste the entire SimpleRobloxUILib.lua source at the top of your script, remove the demo section at the bottom (keep "return Library"), then write your code below it.
 
-WARNING: Requires an executor. RealUI uses gethui, writefile, readfile, isfolder, makefolder, and isfile. It will not run in Roblox Studio without modification.
+WARNING: Requires an executor. SimpleRobloxUILib uses gethui, writefile, readfile, isfolder, makefolder, and isfile. It will not run in Roblox Studio without modification.
 
 ---
 
 ## Quick Start
 
 -- 1. Load the library
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/USERNAME/REPO/main/RealUI.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/acebell1/SimpleRobloxUILib/main/SimpleRobloxUILib.lua"))()
 
 -- 2. Create the window
-local Win = Library:CreateWindow({
+local Win = SimpleUILib:CreateWindow({
     Title = "My Cheats",
     Size = Vector2.new(580, 380),            -- optional
     Accent = Color3.fromRGB(110, 120, 255),  -- optional
-    ToggleKey = Enum.KeyCode.RightShift,     -- optional (default: RightShift)
+    ToggleKey = Enum.KeyCode.Insert,     -- optional
 })
 
 -- 3. Create tabs

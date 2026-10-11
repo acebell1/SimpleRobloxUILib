@@ -5,7 +5,6 @@ local HttpService = game:GetService("HttpService")
 
 local SimpleUILib = {}
 
--- ============================================================ утилиты
 
 local function New(class, props, children)
 	local inst = Instance.new(class)
@@ -120,7 +119,6 @@ local DefaultTheme = {
 	Accent = Color3.fromRGB(110, 120, 255),
 }
 
--- ============================================================ классы
 
 local Window = {}
 Window.__index = Window
@@ -134,7 +132,6 @@ Tab.__index = Tab
 local SubTab = setmetatable({}, { __index = Container })
 SubTab.__index = SubTab
 
--- ============================================================ окно
 
 function Window:_connect(signal, fn)
 	local c = signal:Connect(fn)
@@ -381,8 +378,6 @@ function Window:_newPage(parent)
 	})
 end
 
--- ============================================================ вкладки
-
 function Tab:_setActive(active)
 	local T = self.Window.Theme
 	self.Active = active
@@ -451,8 +446,6 @@ function Tab:CreateSubTab(name)
 	end
 	return sub
 end
-
--- ============================================================ элементы
 
 function Container:_next()
 	self._order += 1
@@ -566,7 +559,6 @@ function Container:AddButton(cfg)
 	W:_accent(arrow, "TextColor3")
 	HoverCard(card, T)
 
-	-- ============ ПЛАШКА ДЛЯ БИНДА ============
 	local bindLabel = New("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, 6, 0.5, 0),
@@ -597,7 +589,6 @@ function Container:AddButton(cfg)
 		name.Text = t
 	end
 
-	-- Пересчёт положения плашки и текста кнопки
 	function obj:_layoutBind()
 		if self.BoundKey and self.BoundKey ~= "" then
 			bindText.Text = "Bind: " .. self.BoundKey
@@ -614,7 +605,6 @@ function Container:AddButton(cfg)
 		end
 	end
 
-	-- Установить бинд (передай nil, чтобы снять)
 	function obj:SetBind(keyName)
 		if keyName == nil or keyName == "" or keyName == "None" then
 			self.BoundKey = nil
@@ -624,14 +614,12 @@ function Container:AddButton(cfg)
 		self:_layoutBind()
 	end
 
-	-- Обычный клик ЛКМ — срабатывает кнопка
 	card.MouseButton1Click:Connect(function()
 		card.BackgroundColor3 = T.Accent
 		Tween(card, { BackgroundColor3 = T.ElementHover }, 0.3)
 		obj:Fire()
 	end)
 
-	-- MMB — начать бинд
 	card.InputBegan:Connect(function(input)
 		if input.UserInputType ~= Enum.UserInputType.MouseButton3 then
 			return
@@ -642,7 +630,6 @@ function Container:AddButton(cfg)
 		obj._bindListening = true
 		W.Listening = true
 
-		-- показать плашку "Bind: ..."
 		bindLabel.BackgroundTransparency = 0
 		bindLabel.Size = UDim2.fromOffset(70, 22)
 		bindText.Text = "Bind: ..."
@@ -657,13 +644,10 @@ function Container:AddButton(cfg)
 			conn:Disconnect()
 
 			if inp.KeyCode == Enum.KeyCode.Backspace then
-				-- снять бинд
 				obj:SetBind(nil)
 			elseif inp.KeyCode == Enum.KeyCode.Delete then
-				-- отмена — оставить старый бинд
 				obj:_layoutBind()
 			else
-				-- поставить новый бинд
 				obj:SetBind(inp.KeyCode.Name)
 			end
 
@@ -674,8 +658,6 @@ function Container:AddButton(cfg)
 		end)
 		table.insert(W._connections, conn)
 	end)
-
-	-- Глобальный обработчик: нажатие привязанной клавиши = нажатие кнопки
 	W:_connect(UIS.InputBegan, function(input, processed)
 		if processed or W.Listening then
 			return
@@ -1151,7 +1133,7 @@ function Container:AddKeybind(cfg)
 			end
 			conn:Disconnect()
 			if input.KeyCode == Enum.KeyCode.Escape then
-				obj:Set(obj.Value, true) -- отмена
+				obj:Set(obj.Value, true)
 			elseif input.KeyCode == Enum.KeyCode.Backspace then
 				obj:Set("None")
 			else
@@ -1178,31 +1160,30 @@ function Container:AddKeybind(cfg)
 	return self:_reg(cfg, obj)
 end
 
--- ============================================================ конфиги
 
 function Window:SaveConfig(name)
 	if not (writefile and isfolder and makefolder) then
-		return false, "файловое API недоступно"
+		return false, "file API unavailable"
 	end
 	local data = {}
 	for flag, opt in pairs(self.Options) do
 		data[flag] = opt.Value
 	end
 	return pcall(function()
-		if not isfolder("RealUI") then
-			makefolder("RealUI")
+		if not isfolder("SimpleUI") then
+			makefolder("SimpleUI")
 		end
-		writefile("RealUI/" .. name .. ".json", HttpService:JSONEncode(data))
+		writefile("SimpleUI/" .. name .. ".json", HttpService:JSONEncode(data))
 	end)
 end
 
 function Window:LoadConfig(name)
 	if not (readfile and isfile) then
-		return false, "файловое API недоступно"
+		return false, "file API unavailable"
 	end
-	local path = "RealUI/" .. name .. ".json"
+	local path = "SimpleUI/" .. name .. ".json"
 	if not isfile(path) then
-		return false, "конфиг не найден"
+		return false, "configuration not found"
 	end
 	return pcall(function()
 		local data = HttpService:JSONDecode(readfile(path))
@@ -1283,7 +1264,7 @@ function Window:CreateSettingsTab(name)
 		Callback = function()
 			local ok, err = self:SaveConfig(cfgName)
 			self:Notify({
-				Title = ok and "Конфиг сохранён" or "Ошибка сохранения",
+				Title = ok and "Config saved" or "Failed to save config",
 				Content = ok and cfgName or tostring(err),
 			})
 		end,
@@ -1293,7 +1274,7 @@ function Window:CreateSettingsTab(name)
 		Callback = function()
 			local ok, err = self:LoadConfig(cfgName)
 			self:Notify({
-				Title = ok and "Конфиг загружен" or "Ошибка загрузки",
+				Title = ok and "Config loaded!" or "Failed to load config",
 				Content = ok and cfgName or tostring(err),
 			})
 		end,
@@ -1308,8 +1289,6 @@ function Window:CreateSettingsTab(name)
 	})
 	return tab
 end
-
--- ============================================================ создание окна
 
 function SimpleUILib:CreateWindow(config)
 	config = config or {}
@@ -1334,7 +1313,7 @@ function SimpleUILib:CreateWindow(config)
 
 	-- ScreenGui
 	local gui = New("ScreenGui", {
-		Name = "RealUI_" .. math.random(100000, 999999),
+		Name = "SimpleUI_" .. math.random(100000, 999999),
 		ResetOnSpawn = false,
 		IgnoreGuiInset = true,
 		DisplayOrder = 999,
@@ -1348,7 +1327,6 @@ function SimpleUILib:CreateWindow(config)
 	end
 	self.Gui = gui
 
-	-- главное окно
 	local main = New("Frame", {
 		Name = "Main",
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -1362,7 +1340,6 @@ function SimpleUILib:CreateWindow(config)
 	self.Main = main
 	self.Scale = New("UIScale", { Parent = main })
 
-	-- верхняя панель
 	local topbar = New("Frame", {
 		Name = "Topbar",
 		Size = UDim2.new(1, 0, 0, TOPBAR),
@@ -1370,7 +1347,7 @@ function SimpleUILib:CreateWindow(config)
 		BorderSizePixel = 0,
 		Parent = main,
 	}, { Corner(10) })
-	New("Frame", { -- заполнитель нижних углов
+	New("Frame", { 
 		Position = UDim2.new(0, 0, 1, -10),
 		Size = UDim2.new(1, 0, 0, 10),
 		BackgroundColor3 = T.Topbar,
@@ -1420,10 +1397,9 @@ function SimpleUILib:CreateWindow(config)
 	end)
 	topButton("–", 32).MouseButton1Click:Connect(function()
 		self:Toggle(false)
-		self:Notify({ Title = "Меню скрыто", Content = "Нажми " .. self.ToggleKey.Name .. ", чтобы открыть", Duration = 3 })
+		self:Notify({ Title = "Menu minimized", Content = "Press " .. self.ToggleKey.Name .. ", to open", Duration = 3 })
 	end)
 
-	-- сайдбар
 	local sidebar = New("Frame", {
 		Name = "Sidebar",
 		Position = UDim2.fromOffset(0, TOPBAR),
@@ -1432,13 +1408,13 @@ function SimpleUILib:CreateWindow(config)
 		BorderSizePixel = 0,
 		Parent = main,
 	}, { Corner(10) })
-	New("Frame", { -- верх
+	New("Frame", { 
 		Size = UDim2.new(1, 0, 0, 10),
 		BackgroundColor3 = T.Sidebar,
 		BorderSizePixel = 0,
 		Parent = sidebar,
 	})
-	New("Frame", { -- правая сторона
+	New("Frame", { 
 		Position = UDim2.new(1, -10, 0, 0),
 		Size = UDim2.new(0, 10, 1, 0),
 		BackgroundColor3 = T.Sidebar,
@@ -1458,7 +1434,6 @@ function SimpleUILib:CreateWindow(config)
 		Padding(8, 10, 8, 8),
 	})
 
-	-- область содержимого
 	self.Content = New("Frame", {
 		Name = "Content",
 		Position = UDim2.new(0, SIDEBAR + 8, 0, TOPBAR + 8),
@@ -1482,8 +1457,7 @@ function SimpleUILib:CreateWindow(config)
 			VerticalAlignment = Enum.VerticalAlignment.Bottom,
 		}),
 	})
-
-	-- перетаскивание за верхнюю панель
+	
 	local dragging, dragStart, startPos = false, nil, nil
 	topbar.InputBegan:Connect(function(input)
 		if isPointer(input) then

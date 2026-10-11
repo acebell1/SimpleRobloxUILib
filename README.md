@@ -1,6 +1,10 @@
 # SimpleRobloxUILib
 Simple Roblox UI Lib for executors, use for creating your cheats
 
+# Donate
+DonationAlerts: https://www.donationalerts.com/r/acebellhub
+PayPal: acebell48@yahoo.com (Recommended)
+
 ## Features
 
 - Clean, modern dark theme with customizable accent color
@@ -427,3 +431,4 @@ Library:CreateWindow({Title, Size, Accent, ToggleKey})
 ---
 
 Made with love for the Roblox scripting community.
+Want to get support? Go on our discord server - https://discord.gg/DXp9YHsmj

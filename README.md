@@ -25,8 +25,6 @@ PayPal: acebell48@yahoo.com (Recommended)
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/acebell1/SimpleRobloxUILib/main/SimpleRobloxUILib.lua"))()
 
-Replace USERNAME/REPO with your own GitHub path.
-
 ### Option B - Local file
 
 Paste the entire SimpleRobloxUILib.lua source at the top of your script, remove the demo section at the bottom (keep "return Library"), then write your code below it.
